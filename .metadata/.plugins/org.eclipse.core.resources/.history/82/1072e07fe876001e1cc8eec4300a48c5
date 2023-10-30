@@ -17,7 +17,7 @@ public class Http
     	URL obj = new URL(url);
     	String host = obj.getHost();
     	System.out.println(host);
-    	String path = (obj.getPath()!="") ? obj.getPath() : "/";
+    	String path = (obj.getPath()!=null)? obj.getPath(): "/";
     	System.out.println(path);
     	String protocol = obj.getProtocol();
     	
