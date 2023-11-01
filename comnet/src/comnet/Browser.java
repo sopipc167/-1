@@ -20,15 +20,12 @@ public class Browser extends Frame implements ActionListener, WindowListener
 	
 	public Browser()
 	{
-		//프레임 설정
 		super("COMNET_BROWSER");
-		setBounds(300, 300, 500, 500);
-		setVisible(true);
 		
 		//검색 판넬
 		panel_Browsing = new Panel();
 		
-		//입력창
+		//검색 창
 		textField_Browse = new TextField(30);
 		
 		//검색 버튼
@@ -38,13 +35,20 @@ public class Browser extends Frame implements ActionListener, WindowListener
 		//검색 결과
 		textArea_Result = new TextArea();
 		
-		panel_Browsing.add(textField_Browse);
-		panel_Browsing.add(button_Browse);
 		add(panel_Browsing, BorderLayout.NORTH);
 		add(textArea_Result, BorderLayout.CENTER);
+		panel_Browsing.add(textField_Browse);
+		panel_Browsing.add(button_Browse);
 		
 		//윈도우 이벤트
 		addWindowListener(this);
+		
+		//프레임 설정
+		setBounds(300, 300, 500, 500);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		setLocation((dim.width/2)-(getWidth()/2), (dim.height/2)-(getHeight()/2));
+		setBackground(new Color(180,211,211));
+		setVisible(true);
 	}
 	
 	public static void main(String[] args) throws Exception
