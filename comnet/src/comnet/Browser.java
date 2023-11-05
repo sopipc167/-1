@@ -184,17 +184,34 @@ public class Browser extends Frame implements ActionListener, WindowListener
         {
             String line = inFromServer.readLine();
 
-            if((line.contains("jpg") || line.contains("png")) && imgURL.isBlank())
+            //이미지
+            if(line.contains("jpg") && imgURL.isBlank())
             {
-            	String a = line.substring(35);
-            	String b = a.substring(0, a.length() - 2);
-            	imgURL = b;
-            }
-            else if(line.contains("title") && title.isBlank())
-            {
-            	title = line;
+            	int start = line.indexOf("content=");          	
+            	String temp = line.substring(start + 9);
+            	int end = temp.indexOf("jpg");
+            	imgURL = temp.substring(0, end + 3);
             }
             
+            //이미지
+            if(line.contains("png") && imgURL.isBlank())
+            {
+            	int start = line.indexOf("content=");          	
+            	String temp = line.substring(start + 9);
+            	int end = temp.indexOf("png");
+            	imgURL = temp.substring(0, end + 3);
+            }
+            
+            //타이틀
+            if(line.contains("<title>") && title.isBlank())
+            {
+            	int start = line.indexOf("<title>");          	
+            	String temp = line.substring(start + 7);
+            	int end = temp.indexOf("</title>");
+            	title = temp.substring(0, end);
+            }
+            
+            //메시지 종료
             if(line.contains("</html>") || line.contains("</body>"))
             	break;
         }
