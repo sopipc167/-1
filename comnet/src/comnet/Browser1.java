@@ -206,7 +206,7 @@ public class Browser1 extends Frame implements ActionListener, WindowListener {
 
 			// 검색 결과 추가
 			for (int i = 0; i < imageURLs.size(); i++) {
-				AddBrowsingResultPanel(toOrderString(i) + title, imageURLs.get(i));
+				AddBrowsingResultPanel(title, imageURLs.get(i));
 			}
 
 			// 소켓 종료
@@ -246,7 +246,9 @@ public class Browser1 extends Frame implements ActionListener, WindowListener {
 
 			// 검색결과 이미지 객체로 리스트에 저장
 			ResultImage result = new ResultImage(title, imgURL, HEX);
-			searchedResultImages.add(result);
+			
+			// 순서 정렬해서 리스트에 객체 저장
+			insertSortedResult(result);
 
 			// 검색 결과 이미지를 (150, 150) 크기로 조정하고 업데이트
 			ImageIcon originalImage = new ImageIcon(ImageIO.read(new URL(imgURL)));
@@ -257,10 +259,7 @@ public class Browser1 extends Frame implements ActionListener, WindowListener {
 
 			// 검색 결과를 토대로 타이틀과 이미지로 구성된 판넬을 생성하여 결과 판넬에 추가
 			ResultPanel.add(panel);
-			Color avrBgColor = new Color(Integer.parseInt(HEX.substring(0, 2), 16),
-					Integer.parseInt(HEX.substring(2, 4), 16), Integer.parseInt(HEX.substring(4, 6), 16));
-			ResultPanel.setBackground(avrBgColor);
-			ResultPanel.revalidate();
+			updateResultPanel();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
@@ -332,6 +331,19 @@ public class Browser1 extends Frame implements ActionListener, WindowListener {
 
 		// 결과 패널 다시 그리기
 		ResultPanel.revalidate();
+	}
+
+	public void insertSortedResult(ResultImage result) {
+		// 검색결과 저장된 리스트 대상으로
+		for (int i = 0; i < searchedResultImages.size(); i++) {
+			// hex코드값 비교해서 순서대로 삽입
+			ResultImage existingResult = searchedResultImages.get(i);
+			if (result.getHEXcode().compareTo(existingResult.getHEXcode()) < 0) {
+				searchedResultImages.add(i, result);
+				return;
+			}
+		}
+		searchedResultImages.add(result);
 	}
 
 	@Override
