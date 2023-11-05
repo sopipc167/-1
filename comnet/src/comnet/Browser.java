@@ -22,226 +22,255 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-public class Browser extends Frame implements ActionListener, WindowListener
-{
+public class Browser extends Frame implements ActionListener, WindowListener {
 	public JFrame frame;
-	
+
 	public JPanel BrowsePanel;
 	public JTextField BrowseTextField;
 	public JButton BrowseButton;
-	
+
 	public JPanel ResultPanel;
-	 
-	public Browser() throws IOException
-	{	
-		//검색 판넬
+
+	public Browser() throws IOException {
+		// 검색 판넬
 		BrowsePanel = new JPanel();
-		
-		//검색 창
+
+		// 검색 창
 		BrowseTextField = new JTextField(30);
-		
-		//검색 버튼
+
+		// 검색 버튼
 		BrowseButton = new JButton("Browse");
 		BrowseButton.addActionListener(this);
-	
-		//검색 판넬 구성
+
+		// 검색 판넬 구성
 		BrowsePanel.add(BrowseTextField);
 		BrowsePanel.add(BrowseButton);
-		BrowsePanel.setBackground(new Color(180,211,211));
-		
-		//검색 결과 스크롤
+		BrowsePanel.setBackground(new Color(180, 211, 211));
+
+		// 검색 결과 스크롤
 		ResultPanel = new JPanel();
 		ResultPanel.setPreferredSize(new Dimension(650, 150));
-	
-		//윈도우 이벤트
+
+		// 윈도우 이벤트
 		addWindowListener(this);
-		
-		//프레임
+
+		// 프레임
 		frame = new JFrame("COMNET_BROWSER");
 		frame.setBounds(300, 300, 800, 800);
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		frame.setLocation((dim.width/2) - 400, (dim.height/2) - 400);
+		frame.setLocation((dim.width / 2) - 400, (dim.height / 2) - 400);
 		frame.setVisible(true);
-		
-		//프레임 구성
+
+		// 프레임 구성
 		frame.add(BrowsePanel, BorderLayout.NORTH);
 		frame.add(ResultPanel, BorderLayout.CENTER);
 	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		//브라우저 프레임 생성
+
+	public static void main(String[] args) throws Exception {
+		// 브라우저 프레임 생성
 		new Browser();
 	}
 
 	@Override
 	public void windowOpened(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void windowClosing(WindowEvent arg0)
-	{
+	public void windowClosing(WindowEvent arg0) {
 		// TODO Auto-generated method stub
 		System.exit(0);
 	}
-	
+
 	@Override
 	public void windowIconified(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		String name = e.getActionCommand();
-		
-		if(name.equals("Browse"))
-		{
-			try 
-			{
+
+		if (name.equals("Browse")) {
+			try {
 				SendHttpGetRequestMsg();
-			} 
-			catch (Exception e1) 
-			{
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
 	}
-	
-	
-	public void SendHttpGetRequestMsg() throws Exception
-	{
-		//검색창으로부터 URL 획득
-    	URL obj = new URL(BrowseTextField.getText());
-    	String host = obj.getHost();
-    	String path = (obj.getPath()!="") ? obj.getPath() : "/";
-    	
-        /*와어어샤크 때 사용하던 DNS와 포트 80번 (Deprecated : HTTP용)
-        Socket clientSocket = new Socket(host, 80); */
-    	
-    	// SSL 소켓 팩토리 생성
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket clientSocket = (SSLSocket) factory.createSocket(host, 443);
-    	
-        //Chapter02 마지막에 있는 Java 예제
-        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 
-        //간단하게 HTTP GET Request 메시지 (파싱한 URL을 바탕으로, 봇 감지를 피하기 위해 user-agent 추가)
-        String HTTPGETRequestMsg = "GET "+path+" HTTP/1.1\r\n"
-            + "Host: "+host+"\r\n"
-            + "Accept-Language: ko,en,q=0.9,en-US,q=0.8\r\n"
-            + "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36\r\n"
-            + "\r\n";
+	public String ImageColorExtractor(URL imageUrl) {
+		try {
+			// 이미지 파일 로드
 
-        //소켓을 통해서 HTTP GET Request 메시지 전송
-        outToServer.writeBytes(HTTPGETRequestMsg);
-        
-        String imgURL = "";
-        String title = "";
-        while(true)
-        {
-            String line = inFromServer.readLine();
+			BufferedImage image = ImageIO.read(imageUrl);
 
-            //이미지
-            if(line.contains("jpg") && imgURL.isBlank())
-            {
-            	int start = line.lastIndexOf("content=");          	
-            	String temp = line.substring(start + 9);
-            	int end = temp.indexOf("jpg\"");
-            	imgURL = temp.substring(0, end + 3);
-            	System.out.println(imgURL);
-            }
-            
-            //이미지
-            if(line.contains("png") && imgURL.isBlank())
-            {
-            	int start = line.lastIndexOf("content=");          	
-            	String temp = line.substring(start + 9);
-            	int end = temp.indexOf("png\"");
-            	imgURL = temp.substring(0, end + 3);
-            	System.out.println(imgURL);
-            }
-            
-            //타이틀
-            if(line.contains("<title>") && title.isBlank())
-            {
-            	int start = line.indexOf("<title>");          	
-            	String temp = line.substring(start + 7);
-            	int end = temp.indexOf("</title>");
-            	title = temp.substring(0, end);
-            	System.out.println(title);
-            }
-            
-            //메시지 종료
-            if(line.contains("</html>") || line.contains("</body>"))
-            	break;
-        }
-        
-        //검색 결과 추가
-        AddBrowsingResultPanel(title, imgURL);
+			int width = image.getWidth();
+			int height = image.getHeight();
+			long totalRed = 0;
+			long totalGreen = 0;
+			long totalBlue = 0;
 
-        //소켓 종료
-        clientSocket.close();
+			// 모든 픽셀을 반복하면서 색상 값 누적
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					int rgb = image.getRGB(x, y);
+					int red = (rgb >> 16) & 0xFF;
+					int green = (rgb >> 8) & 0xFF;
+					int blue = rgb & 0xFF;
+
+					totalRed += red;
+					totalGreen += green;
+					totalBlue += blue;
+				}
+			}
+
+			// 이미지의 평균 색상 계산
+			long totalPixels = width * height;
+			int averageRed = (int) (totalRed / totalPixels);
+			int averageGreen = (int) (totalGreen / totalPixels);
+			int averageBlue = (int) (totalBlue / totalPixels);
+			String result = ("평균 컬러: R=" + averageRed + ", G=" + averageGreen + ", B=" + averageBlue);
+			return result;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ("Color cannnot extracted");
+		}
 	}
-	
-	public void AddBrowsingResultPanel(String title, String imgURL) throws Exception
-	{
-		//검색 결과 판넬
+
+	public void SendHttpGetRequestMsg() throws Exception {
+		// 검색창으로부터 URL 획득
+		URL obj = new URL(BrowseTextField.getText());
+		String host = obj.getHost();
+		String path = (obj.getPath() != "") ? obj.getPath() : "/";
+
+		/*
+		 * 와어어샤크 때 사용하던 DNS와 포트 80번 (Deprecated : HTTP용) Socket clientSocket = new
+		 * Socket(host, 80);
+		 */
+
+		// SSL 소켓 팩토리 생성
+		SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		SSLSocket clientSocket = (SSLSocket) factory.createSocket(host, 443);
+
+		// Chapter02 마지막에 있는 Java 예제
+		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+		// 간단하게 HTTP GET Request 메시지 (파싱한 URL을 바탕으로, 봇 감지를 피하기 위해 user-agent 추가)
+		String HTTPGETRequestMsg = "GET " + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n"
+				+ "Accept-Language: ko,en,q=0.9,en-US,q=0.8\r\n"
+				+ "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36\r\n"
+				+ "\r\n";
+
+		// 소켓을 통해서 HTTP GET Request 메시지 전송
+		outToServer.writeBytes(HTTPGETRequestMsg);
+
+		String imgURL = "";
+		String title = "";
+
+		while (true) {
+			String line = inFromServer.readLine();
+
+			// 이미지
+			if (line.contains("jpg") && imgURL.isBlank()) {
+				int start = line.lastIndexOf("content=");
+				String temp = line.substring(start + 9);
+				int end = temp.indexOf("jpg\"");
+				imgURL = temp.substring(0, end + 3);
+				System.out.println(imgURL);
+			}
+
+			// 이미지
+			if (line.contains("png") && imgURL.isBlank()) {
+				int start = line.lastIndexOf("content=");
+				String temp = line.substring(start + 9);
+				int end = temp.indexOf("png\"");
+				imgURL = temp.substring(0, end + 3);
+				System.out.println(imgURL);
+			}
+
+			// 타이틀
+			if (line.contains("<title>") && title.isBlank()) {
+				int start = line.indexOf("<title>");
+				String temp = line.substring(start + 7);
+				int end = temp.indexOf("</title>");
+				title = temp.substring(0, end);
+				System.out.println(title);
+			}
+
+			// 메시지 종료
+			if (line.contains("</html>") || line.contains("</body>"))
+				break;
+		}
+
+		// 검색 결과 추가
+		AddBrowsingResultPanel(title, imgURL);
+
+		// 소켓 종료
+		clientSocket.close();
+	}
+
+	public void AddBrowsingResultPanel(String title, String imgURL) throws Exception {
+		// 검색 결과 판넬
 		JPanel panel = new JPanel();
-		
-		//검색 결과 이미지
+
+		// 검색 결과 이미지
 		JLabel label = new JLabel();
 		label.setPreferredSize(new Dimension(100, 100));
-		
-		//검색 결과 텍스트
+
+		// 검색 결과 텍스트
 		JTextArea textArea = new JTextArea();
 		textArea.setPreferredSize(new Dimension(500, 100));
-        
-		//검색 결과 판넬에 이미지와 텍스트 추가
-  		panel.add(label);
-  		panel.add(textArea);
-  		
-  		//검색 결과 텍스트 업데이트
-  		textArea.setText(title);
-        
-		//검색 결과 이미지를 (100, 100)사이즈로 조정하고 업데이트
-        URL url = new URL(imgURL);
+
+		// 검색 결과 판넬에 이미지와 텍스트 추가
+		panel.add(label);
+		panel.add(textArea);
+
+		// 검색 결과 텍스트 업데이트
+
+		// 검색 결과 이미지를 (100, 100)사이즈로 조정하고 업데이트
+		URL url = new URL(imgURL);
+		title += "\n";
+		title += ImageColorExtractor(url);
+		textArea.setText(title);
+
 		ImageIcon originalImage = new ImageIcon(ImageIO.read(url));
 		Image ximg = originalImage.getImage();
 		Image yimg = ximg.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
-		ImageIcon scaledImage = new ImageIcon(yimg); 
+		ImageIcon scaledImage = new ImageIcon(yimg);
 		label.setIcon(scaledImage);
-		
-		//검색 결과를 토대로 타이틀과 이미지로 구성된 판넬을 생성하여 결과 판넬에 추가한다
+
+		// 검색 결과를 토대로 타이틀과 이미지로 구성된 판넬을 생성하여 결과 판넬에 추가한다
 		ResultPanel.add(panel);
 		ResultPanel.revalidate();
 	}
